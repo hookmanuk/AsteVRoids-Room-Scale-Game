@@ -49,18 +49,21 @@ public class Asteroid : MonoBehaviour
         Asteroid child1 = null;
         Asteroid child2 = null;
 
-        Game.Instance.EnemiesLeft--;
+        Game.Instance.ReduceEnemiesLeft();
 
         switch (Size.ToString())
         {
             case "1":
                 BangSmall.Play();
+                Game.Instance.HUD.IncrementScore(100);
                 break;
             case "2":
                 BangMedium.Play();
+                Game.Instance.HUD.IncrementScore(50);
                 break;
             case "3":
-                BangLarge.Play();                
+                BangLarge.Play();
+                Game.Instance.HUD.IncrementScore(20);
                 break;
             default:
                 break;

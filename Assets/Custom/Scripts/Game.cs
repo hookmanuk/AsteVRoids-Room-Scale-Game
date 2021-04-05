@@ -10,10 +10,14 @@ public class Game : MonoBehaviour
     public AudioSource Beat2;
     public Ship Ship;
     public HUD HUD;
+    public Asteroid Asteroid1;
 
+    public int EnemiesWave { get; set; }
     public int EnemiesTotal { get; set; }
     public int EnemiesLeft { get; set; }
     public float RefreshRate { get; set; }
+    public bool IsStarted { get; set; }
+    public bool IsScoreEntry { get; set; }
     public float BoundMinX;
     public float BoundMaxX;
     public float BoundMinY;
@@ -21,6 +25,8 @@ public class Game : MonoBehaviour
     public float BoundMinZ;
     public float BoundMaxZ;
     public int Lives { get; set; } = 4;
+
+    public dreamloLeaderBoard dl; //http://dreamlo.com/lb/olXohuxYZkG4akYywjEznARxcAmwowfkWMf3FqGdOGPw
 
     private DateTime _lastBeatPlayed = DateTime.MinValue;
     private AudioSource _nextBeat;
@@ -38,9 +44,68 @@ public class Game : MonoBehaviour
     void Awake()
     {
         _instance = this;
-        EnemiesTotal = CalculateEnemies(4);
+
+        this.dl = dreamloLeaderBoard.GetSceneDreamloLeaderboard();
+    }
+
+    private void Start()
+    {
+        StartCoroutine(HUD.ShowScores());
+    }
+
+    public void StartGame()
+    {
+        if (!IsStarted)
+        {
+            IsStarted = true;           
+
+            HUD.SetMainMenuVisible(false);           
+
+            HUD.ResetScore();
+
+            ResetLivesLeft();
+
+            InitialiseEnemies(4);            
+
+            Ship.Reset();            
+        }
+    }
+
+    public void StopGame()
+    {
+        IsStarted = false;
+
+        foreach (var item in GameObject.FindGameObjectsWithTag("Asteroid"))
+        {
+            Destroy(item.gameObject);
+        }
+
+        Ship.Reset();
+
+        HUD.SetScoreEntryVisible(true);
+    }
+
+    private void InitialiseEnemies(int totalEnemies)
+    {
+        EnemiesWave = totalEnemies;
+        EnemiesTotal = CalculateEnemies(totalEnemies);
         EnemiesLeft = EnemiesTotal;
         _nextBeat = Beat1;
+
+        for (int i = 0; i < totalEnemies; i++)
+        {
+            Instantiate(Asteroid1);
+        }
+    }
+
+    public void ReduceEnemiesLeft()
+    {
+        EnemiesLeft--;
+
+        if (EnemiesLeft <= 0)
+        {
+            InitialiseEnemies(EnemiesWave + 1);
+        }
     }
 
     private int CalculateEnemies(int startingAsteroids)
@@ -51,7 +116,11 @@ public class Game : MonoBehaviour
     void FixedUpdate()
     {
         RefreshRateCheck();
-        BeatCheck();
+
+        if (IsStarted)
+        {
+            BeatCheck();
+        }
     }
 
     private float BeatGap()
@@ -61,7 +130,7 @@ public class Game : MonoBehaviour
 
     private void BeatCheck()
     {
-        if (EnemiesLeft > 0 && (DateTime.Now - _lastBeatPlayed).TotalSeconds > BeatGap())
+        if ((DateTime.Now - _lastBeatPlayed).TotalSeconds > BeatGap())
         {
             _lastBeatPlayed = DateTime.Now;
             _nextBeat.Play();
@@ -172,5 +241,16 @@ public class Game : MonoBehaviour
     {
         Lives--;
         HUD.ReduceLives();
+
+        if (Lives < 0)
+        {
+            StopGame();
+        }
+    }
+
+    public void ResetLivesLeft()
+    {
+        Lives = 3;
+        HUD.ResetLives();        
     }
 }

@@ -9,6 +9,7 @@ public class Ship : MonoBehaviour
     public Bullet Bullet;
     public AudioSource Fire;
     public AudioSource Thrust;
+    public AudioSource Death;    
     public GameObject Thrusters;
     public ParticleSystem Explosion;    
     private InputDevice _rightController = default(InputDevice);
@@ -27,19 +28,16 @@ public class Ship : MonoBehaviour
     {
         SetShipRotation();
 
-        ShootCheck();
+        ShootCheck();        
 
-        float thrustAmount = ThrustAmount();
-
-        if (thrustAmount > 0)
+        if (!Game.Instance.IsScoreEntry && IsThrusting())
         {
             Thrusters.SetActive(true);
             if (!Thrust.isPlaying)
             {
-                Thrust.Play();
-                Thrust.volume = thrustAmount / 2f;
+                Thrust.Play();                
             }
-            Rigidbody.AddForce(transform.forward * thrustAmount, ForceMode.Acceleration);
+            Rigidbody.AddForce(transform.forward * 0.5f, ForceMode.Acceleration);
         }
         else
         {
@@ -67,30 +65,28 @@ public class Ship : MonoBehaviour
         return (rightController.isValid);
     }
 
-    private float ThrustAmount()
+    private bool IsThrusting()
     {
         InputDevice inputDevice;
         float thrustAmount = 0f;
+        bool isThrusting = false;
+        bool isGripped = false;
 
         if (!IsHit)
         {
             if (GetRightController(out inputDevice))
             {
                 inputDevice.TryGetFeatureValue(UnityEngine.XR.CommonUsages.grip, out thrustAmount);
-            }
+                inputDevice.TryGetFeatureValue(UnityEngine.XR.CommonUsages.gripButton, out isGripped);
+            }            
 
-            if (thrustAmount > 0)
+            if (thrustAmount >= 1f || thrustAmount == 0 && isGripped)
             {
-                thrustAmount -= 0.5f;
-
-                if (thrustAmount < 0)
-                {
-                    thrustAmount = 0;
-                }
+                isThrusting = true;
             }
         }
 
-        return thrustAmount;
+        return isThrusting;
     }
 
     private void SetShipRotation()
@@ -165,7 +161,8 @@ public class Ship : MonoBehaviour
 
     IEnumerator WaitThenDestroy()
     {        
-        Explosion.Play();        
+        Explosion.Play();
+        Death.Play();
 
         IsHit = true;
         GetComponent<MeshRenderer>().enabled = false;        
@@ -178,7 +175,7 @@ public class Ship : MonoBehaviour
         Reset();
     }
 
-    private void Reset()
+    public void Reset()
     {
         GetComponent<MeshRenderer>().enabled = true;
         
@@ -188,5 +185,10 @@ public class Ship : MonoBehaviour
         Rigidbody.angularVelocity = Vector3.zero;
 
         IsHit = false;
+    }
+
+    public void SetForScoreEntry()
+    {
+        transform.position = Vector3.zero + Vector3.up + Vector3.left * 2.5f;
     }
 }

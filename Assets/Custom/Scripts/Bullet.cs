@@ -23,6 +23,29 @@ public class Bullet : MonoBehaviour
         {
             Destroy(this.gameObject);
             asteroid.Explode();
-        }        
+        }       
+        else if (Game.Instance.IsScoreEntry && other.gameObject.CompareTag("ScoreLetter"))
+        {
+            if (other.name == "Del")
+            {
+                if (Game.Instance.HUD.Name.text.Length == 1)
+                {
+                    Game.Instance.HUD.Name.UpdateText("");
+                }
+                else if (Game.Instance.HUD.Name.text.Length > 1)
+                {
+                    Game.Instance.HUD.Name.UpdateText(Game.Instance.HUD.Name.text.Substring(0, Game.Instance.HUD.Name.text.Length - 1));
+                }
+            }
+            else if (other.name == "OK")
+            {
+                Game.Instance.HUD.SaveScore();
+            }
+            else
+            {
+                Game.Instance.HUD.Name.UpdateText(Game.Instance.HUD.Name.text + other.name);
+            }
+        }
+
     }
 }
