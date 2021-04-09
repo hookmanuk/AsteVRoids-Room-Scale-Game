@@ -14,6 +14,7 @@ public class Ship : MonoBehaviour
     public ParticleSystem Explosion;    
     private InputDevice _rightController = default(InputDevice);
     private DateTime _lastShot = DateTime.MinValue;
+    private DateTime _lastHyperspace = DateTime.MinValue;
     private bool IsHit = false;
 
     public Rigidbody Rigidbody { get; set; }
@@ -27,6 +28,8 @@ public class Ship : MonoBehaviour
     void FixedUpdate()
     {
         SetShipRotation();
+
+        HyperspaceCheck();
 
         ShootCheck();        
 
@@ -100,6 +103,54 @@ public class Ship : MonoBehaviour
 
             transform.rotation = rotation;
         }
+    }
+
+    private void HyperspaceCheck()
+    {
+        if (WillHyperspace())
+        {
+            Hyperspace();
+        }
+    }
+
+    private bool WillHyperspace()
+    {
+        InputDevice inputDevice;
+        bool isPrimaryDown = false;
+
+        if ((DateTime.Now - _lastHyperspace).TotalMilliseconds > 2000)
+        {
+            if (GetRightController(out inputDevice))
+            {
+                inputDevice.TryGetFeatureValue(UnityEngine.XR.CommonUsages.primaryButton, out isPrimaryDown);
+
+                if (isPrimaryDown)
+                {
+                    _lastHyperspace = DateTime.Now;
+                }
+            }
+        }
+
+        return isPrimaryDown;
+    }
+
+    private void Hyperspace()
+    {
+        //make ship invisible/invincible
+        IsHit = true;
+        GetComponent<MeshRenderer>().enabled = false;
+
+        //wait then move ship somewhere else
+        StartCoroutine(HyperspaceFinish());        
+    }
+
+    IEnumerator HyperspaceFinish()
+    {
+        yield return new WaitForSeconds(0.5f);
+
+        Reset();
+
+        transform.position = new Vector3(Game.Instance.GetRandomFloat(-1.3f, 1.3f), Game.Instance.GetRandomFloat(0.5f, 1.5f), Game.Instance.GetRandomFloat(-1.3f, 1.3f));
     }
 
     private void ShootCheck()
