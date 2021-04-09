@@ -4,6 +4,8 @@ using UnityEngine;
 
 public class Bullet : MonoBehaviour
 {    
+    public BulletSource Source { get; set; }
+
     // Start is called before the first frame update
     void Start()
     {     
@@ -18,12 +20,22 @@ public class Bullet : MonoBehaviour
     private void OnTriggerEnter(Collider other)
     {
         Asteroid asteroid;
+        UFO UFO = null;
         asteroid = other.gameObject.GetComponent<Asteroid>();
+        if (asteroid == null)
+        {
+            UFO = other.gameObject.GetComponent<UFO>();
+        }
         if (asteroid != null)
         {
             Destroy(this.gameObject);
             asteroid.Explode();
         }       
+        else if (UFO != null && Source != BulletSource.UFO)
+        {
+            Destroy(this.gameObject);
+            UFO.Explode(true);
+        }
         else if (Game.Instance.IsScoreEntry && other.gameObject.CompareTag("ScoreLetter"))
         {
             if (other.name == "Del")
@@ -48,4 +60,10 @@ public class Bullet : MonoBehaviour
         }
 
     }
+}
+
+public enum BulletSource
+{
+    Player,
+    UFO
 }

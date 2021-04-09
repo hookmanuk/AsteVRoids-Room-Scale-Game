@@ -11,6 +11,7 @@ public class Game : MonoBehaviour
     public Ship Ship;
     public HUD HUD;
     public Asteroid Asteroid1;
+    public UFO UFO;
 
     public int EnemiesWave { get; set; }
     public int EnemiesTotal { get; set; }
@@ -18,6 +19,9 @@ public class Game : MonoBehaviour
     public float RefreshRate { get; set; }
     public bool IsStarted { get; set; }
     public bool IsScoreEntry { get; set; }
+
+    public bool IsUFOPresent { get; set; }
+    public DateTime UFODeathTime { get; set; } = DateTime.MinValue;
     public float BoundMinX;
     public float BoundMaxX;
     public float BoundMinY;
@@ -85,7 +89,7 @@ public class Game : MonoBehaviour
         HUD.SetScoreEntryVisible(true);
     }
 
-    private void InitialiseEnemies(int totalEnemies)
+    public void InitialiseEnemies(int totalEnemies)
     {
         EnemiesWave = totalEnemies;
         EnemiesTotal = CalculateEnemies(totalEnemies);
@@ -102,10 +106,10 @@ public class Game : MonoBehaviour
     {
         EnemiesLeft--;
 
-        if (EnemiesLeft <= 0)
+        if (EnemiesLeft <= 0 && !IsUFOPresent)
         {
             InitialiseEnemies(EnemiesWave + 1);
-        }
+        }        
     }
 
     private int CalculateEnemies(int startingAsteroids)
@@ -120,7 +124,32 @@ public class Game : MonoBehaviour
         if (IsStarted)
         {
             BeatCheck();
+
+            UFOCheck();
         }
+    }
+
+    private void UFOCheck()
+    {        
+        if ((float)EnemiesLeft / (float)EnemiesTotal < 0.2f)
+        {
+            if (!IsUFOPresent && (DateTime.Now - UFODeathTime).TotalSeconds > 10)
+            {
+                SpawnUFO();
+            }
+        }
+
+        //debug
+        //if (!IsUFOPresent)
+        //{
+        //    SpawnUFO();
+        //}
+    }
+
+    private void SpawnUFO()
+    {
+        Instantiate(UFO);
+        IsUFOPresent = true;
     }
 
     private float BeatGap()
@@ -146,7 +175,7 @@ public class Game : MonoBehaviour
         }
     }
 
-    public Vector3 GetRandomVector3(float min, float max)
+    public Vector3 GetRandomVector3(float min = -180f, float max = 180f)
     {
         return new Vector3(GetRandomFloat(min,max), GetRandomFloat(min, max), GetRandomFloat(min, max));
     }
@@ -156,10 +185,12 @@ public class Game : MonoBehaviour
         return UnityEngine.Random.Range(min, max);
     }
 
-    public void CheckObjectForWarp(Transform transform, bool blnDestroyIfOutside = false)
+    public bool CheckObjectForWarp(Transform transform, bool blnDestroyIfOutside = false)
     {
+        bool warped = false;
         if (transform.position.x > BoundMaxX)
         {
+            warped = true;
             if (blnDestroyIfOutside)
             {
                 Destroy(transform.gameObject);
@@ -171,6 +202,7 @@ public class Game : MonoBehaviour
         }
         else if (transform.position.x < BoundMinX)
         {
+            warped = true;
             if (blnDestroyIfOutside)
             {
                 Destroy(transform.gameObject);
@@ -183,6 +215,7 @@ public class Game : MonoBehaviour
 
         if (transform.position.y > BoundMaxY)
         {
+            warped = true;
             if (blnDestroyIfOutside)
             {
                 Destroy(transform.gameObject);
@@ -194,6 +227,7 @@ public class Game : MonoBehaviour
         }
         else if (transform.position.y < BoundMinY)
         {
+            warped = true;
             if (blnDestroyIfOutside)
             {
                 Destroy(transform.gameObject);
@@ -206,6 +240,7 @@ public class Game : MonoBehaviour
 
         if (transform.position.z > BoundMaxZ)
         {
+            warped = true;
             if (blnDestroyIfOutside)
             {
                 Destroy(transform.gameObject);
@@ -217,6 +252,7 @@ public class Game : MonoBehaviour
         }
         else if (transform.position.z < BoundMinZ)
         {
+            warped = true;
             if (blnDestroyIfOutside)
             {
                 Destroy(transform.gameObject);
@@ -226,6 +262,8 @@ public class Game : MonoBehaviour
                 transform.position = new Vector3(transform.position.x, transform.position.y, BoundMaxZ);
             }
         }
+
+        return warped;
     }
 
     private void RefreshRateCheck()

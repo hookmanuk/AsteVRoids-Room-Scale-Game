@@ -137,7 +137,7 @@ public class Ship : MonoBehaviour
         Fire.Play();
         var newBullet = Instantiate(Bullet);
 
-        newBullet.transform.position = transform.position;
+        newBullet.transform.position = transform.position + transform.forward * 0.055f;
         newBullet.GetComponent<Rigidbody>().AddForce(transform.forward, ForceMode.Impulse);
     }
 
