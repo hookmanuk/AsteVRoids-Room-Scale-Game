@@ -21,7 +21,7 @@ public class Bullet : MonoBehaviour
     {
         Asteroid asteroid;
         UFO UFO = null;
-        asteroid = other.gameObject.GetComponent<Asteroid>();
+        asteroid = other.gameObject.GetComponentInParent<Asteroid>();
         if (asteroid == null)
         {
             UFO = other.gameObject.GetComponent<UFO>();

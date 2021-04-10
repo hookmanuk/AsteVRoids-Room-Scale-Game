@@ -9,10 +9,15 @@ public class Ship : MonoBehaviour
     public Bullet Bullet;
     public AudioSource Fire;
     public AudioSource Thrust;
-    public AudioSource Death;    
-    public GameObject Thrusters;
-    public ParticleSystem Explosion;    
-    private InputDevice _rightController = default(InputDevice);
+    public AudioSource Death;
+    public GameObject SourceClassicThrusters;
+    public GameObject SourceEnhancedThrusters;
+    public GameObject ClassicObject;
+    public GameObject EnhancedObject;
+    public GameObject Thrusters { get; set; }    
+    public InputDevice RightController = default(InputDevice);
+    public MeshRenderer ActiveMeshRenderer { get; set; }
+
     private DateTime _lastShot = DateTime.MinValue;
     private DateTime _lastHyperspace = DateTime.MinValue;
     private bool IsHit = false;
@@ -22,6 +27,9 @@ public class Ship : MonoBehaviour
     void Start()
     {
         Rigidbody = GetComponent<Rigidbody>();
+
+        ActiveMeshRenderer = GetComponentInChildren<MeshRenderer>();
+        Thrusters = SourceClassicThrusters;
     }
 
     // Update is called once per frame
@@ -50,20 +58,20 @@ public class Ship : MonoBehaviour
         Game.Instance.CheckObjectForWarp(transform);
     }
 
-    private bool GetRightController(out InputDevice rightController)
+    public bool GetRightController(out InputDevice rightController)
     {
-        if (!_rightController.isValid)
+        if (!RightController.isValid)
         {
             var rightHandDevices = new List<UnityEngine.XR.InputDevice>();
             UnityEngine.XR.InputDevices.GetDevicesAtXRNode(UnityEngine.XR.XRNode.RightHand, rightHandDevices);
 
             if (rightHandDevices.Count > 0)
             {
-                _rightController = rightHandDevices[0];
+                RightController = rightHandDevices[0];
             }
         }
 
-        rightController = _rightController;
+        rightController = RightController;
 
         return (rightController.isValid);
     }
@@ -138,7 +146,7 @@ public class Ship : MonoBehaviour
     {
         //make ship invisible/invincible
         IsHit = true;
-        GetComponent<MeshRenderer>().enabled = false;
+        ActiveMeshRenderer.enabled = false;
 
         //wait then move ship somewhere else
         StartCoroutine(HyperspaceFinish());        
@@ -195,7 +203,7 @@ public class Ship : MonoBehaviour
     private void OnTriggerEnter(Collider other)
     {        
         Asteroid asteroid;
-        asteroid = other.gameObject.GetComponent<Asteroid>();
+        asteroid = other.gameObject.GetComponentInParent<Asteroid>();
         if (asteroid != null)
         {
             Explode();
@@ -212,11 +220,11 @@ public class Ship : MonoBehaviour
 
     IEnumerator WaitThenDestroy()
     {        
-        Explosion.Play();
+        GetComponentInChildren<ParticleSystem>().Play();
         Death.Play();
 
         IsHit = true;
-        GetComponent<MeshRenderer>().enabled = false;        
+        ActiveMeshRenderer.enabled = false;        
 
         Game.Instance.ReduceLivesLeft();
 
@@ -228,7 +236,7 @@ public class Ship : MonoBehaviour
 
     public void Reset()
     {
-        GetComponent<MeshRenderer>().enabled = true;
+        ActiveMeshRenderer.enabled = true;
         
         Thrusters.SetActive(true);
         transform.position = Vector3.zero + Vector3.up;
@@ -241,5 +249,25 @@ public class Ship : MonoBehaviour
     public void SetForScoreEntry()
     {
         transform.position = Vector3.zero + Vector3.up + Vector3.left * 2.5f;
+    }
+
+    public void SwitchRenderer(RenderType renderType)
+    {
+        switch (renderType)
+        {
+            case RenderType.Classic:
+                EnhancedObject.SetActive(false);
+                ClassicObject.SetActive(true);
+                Thrusters = SourceClassicThrusters;
+                break;
+            case RenderType.Enhanced:
+                EnhancedObject.SetActive(true);
+                ClassicObject.SetActive(false);
+                Thrusters = SourceEnhancedThrusters;
+                break;
+            default:
+                break;
+        }
+        ActiveMeshRenderer = GetComponentInChildren<MeshRenderer>();        
     }
 }

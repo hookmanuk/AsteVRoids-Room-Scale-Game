@@ -40,16 +40,21 @@ public class UFO : MonoBehaviour
         if (Game.Instance.CheckObjectForWarp(transform, (Game.Instance.EnemiesLeft == 0)) && Game.Instance.EnemiesLeft == 0)
         {
             Game.Instance.IsUFOPresent = false;
-            if (Game.Instance.EnemiesLeft == 0)
-            {
-                Game.Instance.InitialiseEnemies(Game.Instance.EnemiesWave + 1);
-            }
+            CheckForRestart();            
         }
 
         if ((DateTime.Now - _lastShot).TotalMilliseconds > 500)
         {
             _lastShot = DateTime.Now;
             Shoot();
+        }
+    }
+
+    private void CheckForRestart()
+    {
+        if (Game.Instance.EnemiesLeft == 0)
+        {
+            Game.Instance.InitialiseEnemies(Game.Instance.EnemiesWave + 1);
         }
     }
 
@@ -92,7 +97,9 @@ public class UFO : MonoBehaviour
         //yield on a new YieldInstruction that waits for 5 seconds.
         yield return new WaitForSeconds(0.5f);
 
-        Destroy(this.gameObject);        
+        Destroy(this.gameObject);
+
+        CheckForRestart();
     }
 
     private void OnCollisionEnter(Collision collision)

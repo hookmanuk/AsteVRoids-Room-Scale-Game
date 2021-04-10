@@ -12,6 +12,7 @@ public class Game : MonoBehaviour
     public HUD HUD;
     public Asteroid Asteroid1;
     public UFO UFO;
+    public RenderType RenderType = RenderType.Classic;
 
     public int EnemiesWave { get; set; }
     public int EnemiesTotal { get; set; }
@@ -34,6 +35,7 @@ public class Game : MonoBehaviour
 
     private DateTime _lastBeatPlayed = DateTime.MinValue;
     private AudioSource _nextBeat;
+    private DateTime _lastRenderSwitch = DateTime.MinValue;
 
     private static Game _instance;
     public static Game Instance
@@ -79,9 +81,9 @@ public class Game : MonoBehaviour
     {
         IsStarted = false;
 
-        foreach (var item in GameObject.FindGameObjectsWithTag("Asteroid"))
+        foreach (Asteroid item in GameObject.FindObjectsOfType<Asteroid>())
         {
-            Destroy(item.gameObject);
+            Destroy(item.ActiveMeshRenderer.gameObject);
         }
 
         Ship.Reset();
@@ -121,6 +123,8 @@ public class Game : MonoBehaviour
     {
         RefreshRateCheck();
 
+        RenderTypeCheck();
+
         if (IsStarted)
         {
             BeatCheck();
@@ -129,7 +133,44 @@ public class Game : MonoBehaviour
         }
     }
 
-    private void UFOCheck()
+    private void RenderTypeCheck()
+    {
+        InputDevice inputDevice;
+        bool isSecondaryPressed;
+
+        if ((DateTime.Now - _lastRenderSwitch).TotalMilliseconds > 200)
+        {
+            if (Ship.GetRightController(out inputDevice))
+            {
+                inputDevice.TryGetFeatureValue(UnityEngine.XR.CommonUsages.secondaryButton, out isSecondaryPressed);
+
+                if (isSecondaryPressed)
+                {
+                    _lastRenderSwitch = DateTime.Now;
+
+                    if (RenderType == RenderType.Classic)
+                    {
+                        RenderType = RenderType.Enhanced;
+                    }
+                    else
+                    {
+                        RenderType = RenderType.Classic;
+                    }
+
+                    foreach (Asteroid item in GameObject.FindObjectsOfType<Asteroid>())
+                    {
+                        item.SwitchRenderer(RenderType);
+                    }
+
+                    Asteroid1.SwitchRenderer(RenderType);
+
+                    Ship.SwitchRenderer(RenderType);
+                }
+            }
+        }        
+    }
+
+        private void UFOCheck()
     {        
         if ((float)EnemiesLeft / (float)EnemiesTotal < 0.2f)
         {
@@ -291,4 +332,10 @@ public class Game : MonoBehaviour
         Lives = 3;
         HUD.ResetLives();        
     }
+}
+
+public enum RenderType
+{
+    Classic,
+    Enhanced
 }
