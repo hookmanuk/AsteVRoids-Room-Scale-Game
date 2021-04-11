@@ -10,6 +10,7 @@ public class Asteroid : MonoBehaviour
     public int Size = 3;
     public GameObject ClassicObject;
     public GameObject EnhancedObject;
+    public Light ExplosionLight;
 
     public bool IsHit { get; set; } = false;
     public MeshRenderer ActiveMeshRenderer { get; set; }
@@ -89,6 +90,12 @@ public class Asteroid : MonoBehaviour
 
         particleSystem.Play();
 
+        GameObject light = null;
+        if (Game.Instance.RenderType == RenderType.Enhanced)
+        {
+            light = Instantiate(ExplosionLight.gameObject);
+            light.SetActive(true);
+        }
 
         if (Size > 1)
         {
@@ -108,6 +115,11 @@ public class Asteroid : MonoBehaviour
 
         //yield on a new YieldInstruction that waits for 0.5 seconds.
         yield return new WaitForSeconds(0.5f);
+
+        if (Game.Instance.RenderType == RenderType.Enhanced)
+        {
+            light.SetActive(false);
+        }
 
         if (child1 != null)
         {
