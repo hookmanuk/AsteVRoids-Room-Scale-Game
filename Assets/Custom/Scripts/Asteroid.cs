@@ -13,6 +13,7 @@ public class Asteroid : MonoBehaviour
 
     public bool IsHit { get; set; } = false;
     public MeshRenderer ActiveMeshRenderer { get; set; }
+    public Rigidbody Rigidbody { get; set; }
 
     // Start is called before the first frame update
     void Start()
@@ -24,11 +25,11 @@ public class Asteroid : MonoBehaviour
             transform.position = new Vector3(Game.Instance.GetRandomFloat(-1.5f, 1.5f), Game.Instance.GetRandomFloat(-0.5f, 2.5f), Game.Instance.GetRandomFloat(-1.5f, 1.5f));
         }
 
-        var rigidBody = GetComponent<Rigidbody>();
+        Rigidbody = GetComponent<Rigidbody>();
 
-        rigidBody.AddTorque(Game.Instance.GetRandomVector3(0, 360) * Game.Instance.GetRandomFloat(0.000003f, 0.000015f), ForceMode.Impulse);        
+        Rigidbody.AddTorque(Game.Instance.GetRandomVector3(0, 360) * Game.Instance.GetRandomFloat(0.000003f, 0.000015f), ForceMode.Impulse);
 
-        rigidBody.AddForce(Game.Instance.GetRandomVector3(-180, 180) * Game.Instance.GetRandomFloat(0.0003f, 0.0015f), ForceMode.Impulse);
+        Rigidbody.AddForce(Game.Instance.GetRandomVector3(-180, 180) * Game.Instance.GetRandomFloat(0.0003f, 0.0015f), ForceMode.Impulse);
 
         if (Size < 3)
         {
@@ -74,8 +75,20 @@ public class Asteroid : MonoBehaviour
             default:
                 break;
         }
-        
-        GetComponentInChildren<ParticleSystem>().Play();
+
+        Rigidbody.velocity = Vector3.zero;
+        Rigidbody.angularVelocity = Vector3.zero;
+
+        var particleSystem = GetComponentInChildren<ParticleSystem>();
+
+        if (Size < 3)
+        {
+            //too small to see!
+            particleSystem.transform.localScale = particleSystem.transform.localScale * 1.5f;            
+        }
+
+        particleSystem.Play();
+
 
         if (Size > 1)
         {
@@ -91,17 +104,22 @@ public class Asteroid : MonoBehaviour
 
         IsHit = true;
         ActiveMeshRenderer.enabled = false;
+        GetComponentInChildren<Collider>().enabled = false;
 
-        //yield on a new YieldInstruction that waits for 5 seconds.
+        //yield on a new YieldInstruction that waits for 0.5 seconds.
         yield return new WaitForSeconds(0.5f);
-
-        Destroy(this.gameObject);
 
         if (child1 != null)
         {
             child1.GetComponentInChildren<Collider>().enabled = true;
             child2.GetComponentInChildren<Collider>().enabled = true;
         }
+
+        //yield on a new YieldInstruction that waits for 10 seconds, allows particle system to finish.
+        yield return new WaitForSeconds(10f);
+        Destroy(this.gameObject);
+
+        
     }
 
     public void SwitchRenderer(RenderType renderType)
