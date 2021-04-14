@@ -2,7 +2,7 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 
-public class Bullet : MonoBehaviour
+public class Bullet : WarpObject
 {    
     public BulletSource Source { get; set; }
 
@@ -14,7 +14,7 @@ public class Bullet : MonoBehaviour
     // Update is called once per frame
     void FixedUpdate()
     {
-        Game.Instance.CheckObjectForWarp(transform, true);
+        CheckObjectForWarp(transform, true);
     }
 
     private void OnTriggerEnter(Collider other)

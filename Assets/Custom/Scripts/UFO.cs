@@ -3,7 +3,7 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 
-public class UFO : MonoBehaviour
+public class UFO : WarpObject
 {
     public Bullet Bullet;
     public AudioSource BangSmall;
@@ -37,7 +37,7 @@ public class UFO : MonoBehaviour
     // Update is called once per frame
     void FixedUpdate()
     {
-        if (Game.Instance.CheckObjectForWarp(transform, (Game.Instance.EnemiesLeft == 0)) && Game.Instance.EnemiesLeft == 0)
+        if (CheckObjectForWarp(transform, (Game.Instance.EnemiesLeft == 0)) && Game.Instance.EnemiesLeft == 0)
         {
             Game.Instance.IsUFOPresent = false;
             CheckForRestart();            

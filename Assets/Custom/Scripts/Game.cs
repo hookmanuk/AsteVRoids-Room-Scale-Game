@@ -1,6 +1,7 @@
 using System;
 using System.Collections;
 using System.Collections.Generic;
+using System.Linq;
 using UnityEngine;
 using UnityEngine.XR;
 
@@ -13,6 +14,7 @@ public class Game : MonoBehaviour
     public Asteroid Asteroid1;
     public UFO UFO;
     public RenderType RenderType = RenderType.Classic;
+    public Light[] Lights;
 
     public int EnemiesWave { get; set; }
     public int EnemiesTotal { get; set; }
@@ -165,6 +167,11 @@ public class Game : MonoBehaviour
                     Asteroid1.SwitchRenderer(RenderType);
 
                     Ship.SwitchRenderer(RenderType);
+
+                    foreach (var light in Lights)
+                    {
+                        light.enabled = (RenderType == RenderType.Enhanced);
+                    }
                 }
             }
         }        
@@ -226,86 +233,7 @@ public class Game : MonoBehaviour
         return UnityEngine.Random.Range(min, max);
     }
 
-    public bool CheckObjectForWarp(Transform transform, bool blnDestroyIfOutside = false)
-    {
-        bool warped = false;
-        if (transform.position.x > BoundMaxX)
-        {
-            warped = true;
-            if (blnDestroyIfOutside)
-            {
-                Destroy(transform.gameObject);
-            }
-            else
-            {
-                transform.position = new Vector3(BoundMinX, transform.position.y, transform.position.z);
-            }            
-        }
-        else if (transform.position.x < BoundMinX)
-        {
-            warped = true;
-            if (blnDestroyIfOutside)
-            {
-                Destroy(transform.gameObject);
-            }
-            else
-            {
-                transform.position = new Vector3(BoundMaxX, transform.position.y, transform.position.z);
-            }
-        }
-
-        if (transform.position.y > BoundMaxY)
-        {
-            warped = true;
-            if (blnDestroyIfOutside)
-            {
-                Destroy(transform.gameObject);
-            }
-            else
-            {
-                transform.position = new Vector3(transform.position.x, BoundMinY, transform.position.z);
-            }
-        }
-        else if (transform.position.y < BoundMinY)
-        {
-            warped = true;
-            if (blnDestroyIfOutside)
-            {
-                Destroy(transform.gameObject);
-            }
-            else
-            {
-                transform.position = new Vector3(transform.position.x, BoundMaxY, transform.position.z);
-            }
-        }
-
-        if (transform.position.z > BoundMaxZ)
-        {
-            warped = true;
-            if (blnDestroyIfOutside)
-            {
-                Destroy(transform.gameObject);
-            }
-            else
-            {
-                transform.position = new Vector3(transform.position.x, transform.position.y, BoundMinZ);
-            }
-        }
-        else if (transform.position.z < BoundMinZ)
-        {
-            warped = true;
-            if (blnDestroyIfOutside)
-            {
-                Destroy(transform.gameObject);
-            }
-            else
-            {
-                transform.position = new Vector3(transform.position.x, transform.position.y, BoundMaxZ);
-            }
-        }
-
-        return warped;
-    }
+    
 
     private void RefreshRateCheck()
     {

@@ -4,7 +4,7 @@ using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.XR;
 
-public class Ship : MonoBehaviour
+public class Ship : WarpObject
 {
     public Bullet Bullet;
     public AudioSource Fire;
@@ -55,7 +55,7 @@ public class Ship : MonoBehaviour
             Thrusters.SetActive(false);
         }
 
-        Game.Instance.CheckObjectForWarp(transform);
+        CheckObjectForWarp(transform);
     }
 
     public bool GetRightController(out InputDevice rightController)

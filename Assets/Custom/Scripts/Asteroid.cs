@@ -2,7 +2,7 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 
-public class Asteroid : MonoBehaviour
+public class Asteroid : WarpObject
 {
     public AudioSource BangSmall;
     public AudioSource BangMedium;
@@ -41,7 +41,7 @@ public class Asteroid : MonoBehaviour
     // Update is called once per frame
     void FixedUpdate()
     {
-        Game.Instance.CheckObjectForWarp(transform);
+        CheckObjectForWarp(transform);
     }
 
     public void Explode()
