@@ -8,18 +8,27 @@ public class Asteroid : WarpObject
     public AudioSource BangMedium;
     public AudioSource BangLarge;
     public int Size = 3;
-    public GameObject ClassicObject;
-    public GameObject EnhancedObject;
+    public GameObject[] ClassicObjects;
+    public GameObject[] EnhancedObjects;
     public Light ExplosionLight;
+    public ParticleSystem ClassicExplosion;
+    public ParticleSystem EnhancedExplosion;
 
     public bool IsHit { get; set; } = false;
     public MeshRenderer ActiveMeshRenderer { get; set; }
     public Rigidbody Rigidbody { get; set; }
+    public int _asteroidVersion = 1;
 
     // Start is called before the first frame update
     void Start()
     {
-        ActiveMeshRenderer = GetComponentInChildren<MeshRenderer>();                
+        _asteroidVersion = UnityEngine.Random.Range(0, ClassicObjects.Length);
+        SwitchRenderer(Game.Instance.RenderType);
+
+        ActiveMeshRenderer = GetComponentInChildren<MeshRenderer>();
+
+        //disable colliders to start with till they disperse
+        StartCoroutine(InitColliders());
 
         if (Size == 3)
         {
@@ -35,7 +44,7 @@ public class Asteroid : WarpObject
         if (Size < 3)
         {
             transform.localScale = transform.localScale * 0.5f;
-        }        
+        }                
     }    
 
     // Update is called once per frame
@@ -50,6 +59,15 @@ public class Asteroid : WarpObject
         {
             StartCoroutine(WaitThenDestroy());
         }
+    }
+
+    IEnumerator InitColliders()
+    {
+        GetComponentInChildren<Collider>().enabled = false;
+
+        yield return new WaitForSeconds(1f);
+
+        GetComponentInChildren<Collider>().enabled = true;
     }
 
     IEnumerator WaitThenDestroy()
@@ -80,7 +98,7 @@ public class Asteroid : WarpObject
         Rigidbody.velocity = Vector3.zero;
         Rigidbody.angularVelocity = Vector3.zero;
 
-        var particleSystem = GetComponentInChildren<ParticleSystem>();
+        var particleSystem = Game.Instance.RenderType == RenderType.Classic ? ClassicExplosion : EnhancedExplosion;
 
         if (Size < 3)
         {
@@ -116,7 +134,7 @@ public class Asteroid : WarpObject
         //yield on a new YieldInstruction that waits for 0.5 seconds.
         yield return new WaitForSeconds(0.5f);
 
-        if (Game.Instance.RenderType == RenderType.Enhanced)
+        if (light != null)
         {
             light.SetActive(false);
         }
@@ -136,19 +154,38 @@ public class Asteroid : WarpObject
 
     public void SwitchRenderer(RenderType renderType)
     {
-        switch (renderType)
+        if (!IsHit)
         {
-            case RenderType.Classic:
-                EnhancedObject.SetActive(false);
-                ClassicObject.SetActive(true);
-                break;
-            case RenderType.Enhanced:
-                EnhancedObject.SetActive(true);
-                ClassicObject.SetActive(false);
-                break;
-            default:
-                break;
+            foreach (var item in EnhancedObjects)
+            {
+                if (item.activeSelf)
+                {
+                    item.SetActive(false);
+                }
+            }
+
+            foreach (var item in ClassicObjects)
+            {
+                if (item.activeSelf)
+                {
+                    item.SetActive(false);
+                }
+            }
+
+            switch (renderType)
+            {
+                case RenderType.Classic:
+                    EnhancedObjects[_asteroidVersion].SetActive(false);
+                    ClassicObjects[_asteroidVersion].SetActive(true);
+                    break;
+                case RenderType.Enhanced:
+                    EnhancedObjects[_asteroidVersion].SetActive(true);
+                    ClassicObjects[_asteroidVersion].SetActive(false);
+                    break;
+                default:
+                    break;
+            }
+            ActiveMeshRenderer = GetComponentInChildren<MeshRenderer>();
         }
-        ActiveMeshRenderer = GetComponentInChildren<MeshRenderer>();
     }
 }

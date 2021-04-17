@@ -24,7 +24,7 @@ public class Ship : WarpObject
 
     public Rigidbody Rigidbody { get; set; }
     // Start is called before the first frame update
-    void Start()
+    void Awake()
     {
         Rigidbody = GetComponent<Rigidbody>();
 

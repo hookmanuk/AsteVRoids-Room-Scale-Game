@@ -3,7 +3,12 @@ guid: 1dc0ae76c5d3a2f47988e484aa5f385f
 ModelImporter:
   serializedVersion: 20200
   internalIDToNameTable: []
-  externalObjects: {}
+  externalObjects:
+  - first:
+      type: UnityEngine:Material
+      assembly: UnityEngine.CoreModule
+      name: Aster_Small_2_
+    second: {fileID: 2100000, guid: c8f2c733120759d4e962b85ef16d17aa, type: 2}
   materials:
     materialImportMode: 2
     materialName: 0

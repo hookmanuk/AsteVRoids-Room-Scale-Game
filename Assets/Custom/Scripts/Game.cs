@@ -14,7 +14,7 @@ public class Game : MonoBehaviour
     public Asteroid Asteroid1;
     public UFO UFO;
     public RenderType RenderType = RenderType.Classic;
-    public Light[] Lights;
+    public Light[] Lights;    
 
     public int EnemiesWave { get; set; }
     public int EnemiesTotal { get; set; }
@@ -34,6 +34,8 @@ public class Game : MonoBehaviour
     public int Lives { get; set; } = 4;
 
     public dreamloLeaderBoard dl; //http://dreamlo.com/lb/olXohuxYZkG4akYywjEznARxcAmwowfkWMf3FqGdOGPw
+
+    public bool DebugStart;
 
     private DateTime _lastBeatPlayed = DateTime.MinValue;
     private AudioSource _nextBeat;
@@ -59,6 +61,13 @@ public class Game : MonoBehaviour
     private void Start()
     {
         StartCoroutine(HUD.ShowScores());
+
+        ApplyRenderType();
+
+        if (DebugStart)
+        {
+            StartGame();
+        }
     }
 
     public void StartGame()
@@ -159,22 +168,25 @@ public class Game : MonoBehaviour
                         RenderType = RenderType.Classic;
                     }
 
-                    foreach (Asteroid item in GameObject.FindObjectsOfType<Asteroid>())
-                    {
-                        item.SwitchRenderer(RenderType);
-                    }
-
-                    Asteroid1.SwitchRenderer(RenderType);
-
-                    Ship.SwitchRenderer(RenderType);
-
-                    foreach (var light in Lights)
-                    {
-                        light.enabled = (RenderType == RenderType.Enhanced);
-                    }
+                    ApplyRenderType();
                 }
             }
         }        
+    }
+
+    public void ApplyRenderType()
+    {
+        foreach (Asteroid item in GameObject.FindObjectsOfType<Asteroid>())
+        {
+            item.SwitchRenderer(RenderType);
+        }        
+
+        Ship.SwitchRenderer(RenderType);
+
+        foreach (var light in Lights)
+        {
+            light.enabled = (RenderType == RenderType.Enhanced);
+        }
     }
 
         private void UFOCheck()
