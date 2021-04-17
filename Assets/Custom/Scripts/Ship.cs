@@ -248,7 +248,7 @@ public class Ship : WarpObject
 
     public void SetForScoreEntry()
     {
-        transform.position = Vector3.zero + Vector3.up + Vector3.left * 2.5f;
+        transform.position = Vector3.zero + Vector3.up + Vector3.forward * 1.5f;
     }
 
     public void SwitchRenderer(RenderType renderType)
