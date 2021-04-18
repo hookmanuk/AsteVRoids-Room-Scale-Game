@@ -7,8 +7,10 @@ using UnityEngine.XR;
 
 public class Game : MonoBehaviour
 {
-    public AudioSource Beat1;
-    public AudioSource Beat2;
+    public AudioSource ClassicBeat1;
+    public AudioSource ClassicBeat2;
+    public AudioSource EnhancedBeat1;
+    public AudioSource EnhancedBeat2;
     public Ship Ship;
     public HUD HUD;
     public Asteroid Asteroid1;
@@ -107,7 +109,7 @@ public class Game : MonoBehaviour
         EnemiesWave = totalEnemies;
         EnemiesTotal = CalculateEnemies(totalEnemies);
         EnemiesLeft = EnemiesTotal;
-        _nextBeat = Beat1;
+        _nextBeat = (RenderType == RenderType.Classic ? ClassicBeat1 : EnhancedBeat1);
 
         for (int i = 0; i < totalEnemies; i++)
         {
@@ -214,7 +216,7 @@ public class Game : MonoBehaviour
 
     private float BeatGap()
     {
-        return (float)EnemiesLeft / (float)EnemiesTotal + 0.1f;
+        return (float)EnemiesLeft / (float)EnemiesTotal + 0.15f;
     }
 
     private void BeatCheck()
@@ -224,13 +226,27 @@ public class Game : MonoBehaviour
             _lastBeatPlayed = DateTime.Now;
             _nextBeat.Play();
 
-            if (_nextBeat == Beat1)
+            if (RenderType == RenderType.Classic)
             {
-                _nextBeat = Beat2;
+                if (_nextBeat == ClassicBeat1)
+                {
+                    _nextBeat = ClassicBeat2;
+                }
+                else
+                {
+                    _nextBeat = ClassicBeat1;
+                }
             }
-            else
+            else if (RenderType == RenderType.Enhanced)
             {
-                _nextBeat = Beat1;
+                if (_nextBeat == EnhancedBeat1)
+                {
+                    _nextBeat = EnhancedBeat2;
+                }
+                else
+                {
+                    _nextBeat = EnhancedBeat1;
+                }
             }
         }
     }

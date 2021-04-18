@@ -6,8 +6,10 @@ using UnityEngine.XR;
 
 public class Ship : WarpObject
 {
-    public Bullet Bullet;
-    public AudioSource Fire;
+    public Bullet ClassicBullet;
+    public Bullet EnhancedBullet;
+    public AudioSource ClassicFire;
+    public AudioSource EnhancedFire;
     public AudioSource Thrust;
     public AudioSource Death;
     public GameObject SourceClassicThrusters;
@@ -192,9 +194,19 @@ public class Ship : WarpObject
 
     private void Shoot()
     {
+        Bullet newBullet;
+
         //pew pew
-        Fire.Play();
-        var newBullet = Instantiate(Bullet);
+        if (Game.Instance.RenderType == RenderType.Classic)
+        {
+            ClassicFire.Play();
+            newBullet = Instantiate(ClassicBullet);
+        }
+        else
+        {
+            EnhancedFire.Play();
+            newBullet = Instantiate(EnhancedBullet);
+        }               
 
         newBullet.transform.position = transform.position + transform.forward * 0.055f;
         newBullet.GetComponent<Rigidbody>().AddForce(transform.forward, ForceMode.Impulse);
