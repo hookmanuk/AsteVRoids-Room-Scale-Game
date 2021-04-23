@@ -1,3 +1,4 @@
+using System;
 using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
@@ -99,6 +100,8 @@ public class WarpObject : MonoBehaviour
 
         IsWarping = true;
 
+        var ship = transform.gameObject.GetComponent<Ship>();
+
         //dissolveMaterials.Add(transform.GetComponent<MeshRenderer>().material);
         foreach (var item in transform.GetComponentsInChildren<MeshRenderer>())
         {
@@ -114,6 +117,11 @@ public class WarpObject : MonoBehaviour
                 item.SetFloat("HIDDEN_RATIO", 1 - t / 1f);
             }
 
+            if (ship != null)
+            {
+                ship.Beam.range = (float)Math.Max(3 * (0.5 - t), 0);
+            }
+
             yield return null;
         }
 
@@ -127,6 +135,11 @@ public class WarpObject : MonoBehaviour
             foreach (var item in dissolveMaterials)
             {
                 item.SetFloat("HIDDEN_RATIO", t / 0.5f);
+            }
+
+            if (ship != null)
+            {
+                ship.Beam.range = (float)Math.Max(6 * t, 0);
             }
 
             yield return null;

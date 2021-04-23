@@ -5,10 +5,15 @@ using UnityEngine;
 
 public class UFO : WarpObject
 {
-    public Bullet Bullet;
+    public Bullet ClassicBullet;
+    public Bullet EnhancedBullet;
+    public GameObject ClassicObject;
+    public GameObject EnhancedObject;
+
     public AudioSource BangSmall;
     public AudioSource UFOSound;
-    public ParticleSystem Explosion;
+    public ParticleSystem ClassicExplosion;
+    public ParticleSystem EnhancedExplosion;
     public bool IsHit { get; set; } = false;
     private DateTime _lastShot = DateTime.MinValue;
 
@@ -16,6 +21,7 @@ public class UFO : WarpObject
     void Start()
     {
         var rigidBody = GetComponent<Rigidbody>();
+        SwitchRenderer(Game.Instance.RenderType);
         int xWall = Math.Sign(Game.Instance.GetRandomFloat(-1f, 1f));
 
         if (xWall == 1)
@@ -62,7 +68,16 @@ public class UFO : WarpObject
     {
         //pew pew
         //Fire.Play();
-        var newBullet = Instantiate(Bullet);
+        Bullet newBullet;
+        if (Game.Instance.RenderType == RenderType.Classic)
+        {
+            newBullet = Instantiate(ClassicBullet);
+        }
+        else
+        {
+            newBullet = Instantiate(EnhancedBullet);
+        }
+        
         newBullet.Source = BulletSource.UFO;
 
         var bulletDirection = Game.Instance.GetRandomVector3() * 0.01f;
@@ -89,10 +104,18 @@ public class UFO : WarpObject
         {
             Game.Instance.HUD.IncrementScore(200);
         }
-        Explosion.Play();        
+        if (Game.Instance.RenderType == RenderType.Classic)
+        {
+            ClassicExplosion.Play();
+        }
+        else
+        {
+            EnhancedExplosion.Play();
+        }
+        
 
         IsHit = true;
-        GetComponent<MeshRenderer>().enabled = false;
+        GetComponentInChildren<MeshRenderer>().enabled = false;
 
         //yield on a new YieldInstruction that waits for 5 seconds.
         yield return new WaitForSeconds(0.5f);
@@ -115,5 +138,22 @@ public class UFO : WarpObject
         {
             Game.Instance.Ship.Explode();
         }
+    }
+
+    public void SwitchRenderer(RenderType renderType)
+    {
+        switch (renderType)
+        {
+            case RenderType.Classic:
+                EnhancedObject.SetActive(false);
+                ClassicObject.SetActive(true);                
+                break;
+            case RenderType.Enhanced:
+                EnhancedObject.SetActive(true);
+                ClassicObject.SetActive(false);                
+                break;
+            default:
+                break;
+        }        
     }
 }

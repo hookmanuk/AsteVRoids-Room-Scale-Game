@@ -189,11 +189,39 @@ public class Game : MonoBehaviour
         {
             light.enabled = (RenderType == RenderType.Enhanced);
         }
+
+        foreach (UFO item in GameObject.FindObjectsOfType<UFO>())
+        {
+            item.SwitchRenderer(RenderType);
+        }
+
+        if (RenderType == RenderType.Classic)
+        {
+            if (_nextBeat == EnhancedBeat1)
+            {
+                _nextBeat = ClassicBeat1;
+            }
+            else
+            {
+                _nextBeat = ClassicBeat2;
+            }
+        }
+        else if (RenderType == RenderType.Enhanced)
+        {
+            if (_nextBeat == ClassicBeat1)
+            {
+                _nextBeat = EnhancedBeat1;
+            }
+            else
+            {
+                _nextBeat = EnhancedBeat2;
+            }
+        }
     }
 
-        private void UFOCheck()
-    {        
-        if ((float)EnemiesLeft / (float)EnemiesTotal < 0.2f)
+    private void UFOCheck()
+    {
+        if ((float)EnemiesLeft / (float)EnemiesTotal < 0.2f)        
         {
             if (!IsUFOPresent && (DateTime.Now - UFODeathTime).TotalSeconds > 10)
             {

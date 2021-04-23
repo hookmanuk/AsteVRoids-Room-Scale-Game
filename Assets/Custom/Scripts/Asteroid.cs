@@ -15,7 +15,7 @@ public class Asteroid : WarpObject
     public ParticleSystem EnhancedExplosion;
 
     public bool IsHit { get; set; } = false;
-    public MeshRenderer ActiveMeshRenderer { get; set; }
+    public MeshRenderer ActiveMeshRenderer;
     public Rigidbody Rigidbody { get; set; }
     public int _asteroidVersion = 1;
 
@@ -95,6 +95,8 @@ public class Asteroid : WarpObject
                 break;
         }
 
+        IsHit = true;        
+
         Rigidbody.velocity = Vector3.zero;
         Rigidbody.angularVelocity = Vector3.zero;
 
@@ -127,12 +129,11 @@ public class Asteroid : WarpObject
             child1.GetComponentInChildren<Collider>().enabled = false;
         }
 
-        IsHit = true;
         ActiveMeshRenderer.enabled = false;
         GetComponentInChildren<Collider>().enabled = false;
 
         //yield on a new YieldInstruction that waits for 0.5 seconds.
-        yield return new WaitForSeconds(0.5f);
+        yield return new WaitForSeconds(0.75f);
 
         if (light != null)
         {

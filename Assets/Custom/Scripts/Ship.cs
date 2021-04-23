@@ -1,6 +1,7 @@
 using System;
 using System.Collections;
 using System.Collections.Generic;
+using System.Linq;
 using UnityEngine;
 using UnityEngine.XR;
 
@@ -16,6 +17,7 @@ public class Ship : WarpObject
     public GameObject SourceEnhancedThrusters;
     public GameObject ClassicObject;
     public GameObject EnhancedObject;
+    public Light Beam;
     public GameObject Thrusters { get; set; }    
     public InputDevice RightController = default(InputDevice);
     public MeshRenderer ActiveMeshRenderer { get; set; }
@@ -148,20 +150,62 @@ public class Ship : WarpObject
     {
         //make ship invisible/invincible
         IsHit = true;
-        ActiveMeshRenderer.enabled = false;
+        //ActiveMeshRenderer.enabled = false;
 
-        //wait then move ship somewhere else
-        StartCoroutine(HyperspaceFinish());        
+        StartCoroutine(DissolveThenHyperspace(new Vector3(Game.Instance.GetRandomFloat(-1.3f, 1.3f), Game.Instance.GetRandomFloat(0.5f, 1.5f), Game.Instance.GetRandomFloat(-1.3f, 1.3f))));           
     }
 
-    IEnumerator HyperspaceFinish()
+    IEnumerator DissolveThenHyperspace(Vector3 warpPosition)
     {
+        float t = 0;
+        List<Material> dissolveMaterials = new List<Material>();
+
+        if (Game.Instance.RenderType == RenderType.Enhanced)
+        {
+            //dissolveMaterials.Add(transform.GetComponent<MeshRenderer>().material);
+            foreach (var item in transform.GetComponentsInChildren<MeshRenderer>())
+            {
+                dissolveMaterials.AddRange(item.materials.ToList());
+            }
+
+            while (t < 1f)
+            {
+                t += Time.deltaTime / 1f;
+
+                foreach (var item in dissolveMaterials)
+                {
+                    item.SetFloat("HIDDEN_RATIO", 1 - t / 1f);
+                }
+
+                Beam.range = (float)Math.Max(3 * (0.5 - t), 0);
+
+                yield return null;
+            }            
+        }
+        else
+        {
+            ActiveMeshRenderer.enabled = false;
+        }
+
         yield return new WaitForSeconds(0.5f);
 
         Reset();
 
-        transform.position = new Vector3(Game.Instance.GetRandomFloat(-1.3f, 1.3f), Game.Instance.GetRandomFloat(0.5f, 1.5f), Game.Instance.GetRandomFloat(-1.3f, 1.3f));
-    }
+        transform.position = warpPosition;
+
+        t = 0;
+        while (t < 0.5f)
+        {
+            t += Time.deltaTime / 0.5f;
+
+            foreach (var item in dissolveMaterials)
+            {
+                item.SetFloat("HIDDEN_RATIO", t / 0.5f);
+            }
+
+            yield return null;
+        }        
+    }    
 
     private void ShootCheck()
     {
@@ -241,7 +285,7 @@ public class Ship : WarpObject
         Game.Instance.ReduceLivesLeft();
 
         //yield on a new YieldInstruction that waits for 5 seconds.
-        yield return new WaitForSeconds(0.5f);        
+        yield return new WaitForSeconds(1f);        
 
         Reset();
     }
@@ -251,6 +295,7 @@ public class Ship : WarpObject
         ActiveMeshRenderer.enabled = true;
         
         Thrusters.SetActive(true);
+        Beam.range = 3;
         transform.position = Vector3.zero + Vector3.up;
         Rigidbody.velocity = Vector3.zero;
         Rigidbody.angularVelocity = Vector3.zero;

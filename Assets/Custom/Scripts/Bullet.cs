@@ -24,7 +24,7 @@ public class Bullet : WarpObject
         asteroid = other.gameObject.GetComponentInParent<Asteroid>();
         if (asteroid == null)
         {
-            UFO = other.gameObject.GetComponent<UFO>();
+            UFO = other.gameObject.GetComponentInParent<UFO>();
         }
         if (asteroid != null)
         {
