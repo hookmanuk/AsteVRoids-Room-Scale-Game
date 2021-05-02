@@ -20,6 +20,7 @@ public class Ship : WarpObject
     public Light Beam;
     public GameObject Thrusters { get; set; }    
     public InputDevice RightController = default(InputDevice);
+    public InputDevice LeftController = default(InputDevice);
     public MeshRenderer ActiveMeshRenderer { get; set; }
 
     private DateTime _lastShot = DateTime.MinValue;
@@ -80,6 +81,24 @@ public class Ship : WarpObject
         return (rightController.isValid);
     }
 
+    public bool GetLeftController(out InputDevice leftController)
+    {
+        if (!LeftController.isValid)
+        {
+            var leftHandDevices = new List<UnityEngine.XR.InputDevice>();
+            UnityEngine.XR.InputDevices.GetDevicesAtXRNode(UnityEngine.XR.XRNode.LeftHand, leftHandDevices);
+
+            if (leftHandDevices.Count > 0)
+            {
+                LeftController = leftHandDevices[0];
+            }
+        }
+
+        leftController = LeftController;
+
+        return (leftController.isValid);
+    }
+
     private bool IsThrusting()
     {
         InputDevice inputDevice;
@@ -95,9 +114,21 @@ public class Ship : WarpObject
                 inputDevice.TryGetFeatureValue(UnityEngine.XR.CommonUsages.gripButton, out isGripped);
             }            
 
-            if (thrustAmount >= 1f || thrustAmount == 0 && isGripped)
+            if (thrustAmount >= 1f || isGripped)
             {
                 isThrusting = true;
+            }
+            else
+            {
+                if (GetLeftController(out inputDevice))
+                {
+                    inputDevice.TryGetFeatureValue(UnityEngine.XR.CommonUsages.triggerButton, out isGripped);
+
+                    if (isGripped)
+                    {
+                        isThrusting = true;
+                    }
+                }
             }
         }
 

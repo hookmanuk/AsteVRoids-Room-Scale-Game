@@ -42,6 +42,9 @@ public class Game : MonoBehaviour
     private DateTime _lastBeatPlayed = DateTime.MinValue;
     private AudioSource _nextBeat;
     private DateTime _lastRenderSwitch = DateTime.MinValue;
+    private float _originalDrag = 0.025f;    
+    public float CurrentDrag { get { return _originalDrag * (1 / CurrentSpeedMultiplier); } }
+    public float CurrentSpeedMultiplier { get; set; } = 1;
 
     private static Game _instance;
     public static Game Instance
@@ -84,6 +87,8 @@ public class Game : MonoBehaviour
 
             ResetLivesLeft();
 
+            CurrentSpeedMultiplier = 1;            
+
             InitialiseEnemies(4);            
 
             Ship.Reset();            
@@ -107,6 +112,8 @@ public class Game : MonoBehaviour
     public void InitialiseEnemies(int totalEnemies)
     {
         EnemiesWave = totalEnemies;
+        CurrentSpeedMultiplier = EnemiesWave * 2.5f / 4;        
+
         EnemiesTotal = CalculateEnemies(totalEnemies);
         EnemiesLeft = EnemiesTotal;
         _nextBeat = (RenderType == RenderType.Classic ? ClassicBeat1 : EnhancedBeat1);

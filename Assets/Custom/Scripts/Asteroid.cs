@@ -37,9 +37,12 @@ public class Asteroid : WarpObject
 
         Rigidbody = GetComponent<Rigidbody>();
 
-        Rigidbody.AddTorque(Game.Instance.GetRandomVector3(0, 360) * Game.Instance.GetRandomFloat(0.000003f, 0.000015f), ForceMode.Impulse);
+        Rigidbody.AddTorque(Game.Instance.GetRandomVector3(0, 360) * Game.Instance.GetRandomFloat(0.000003f * Game.Instance.CurrentSpeedMultiplier, 0.000015f * Game.Instance.CurrentSpeedMultiplier), ForceMode.Impulse);
 
-        Rigidbody.AddForce(Game.Instance.GetRandomVector3(-180, 180) * Game.Instance.GetRandomFloat(0.0003f, 0.0015f), ForceMode.Impulse);
+        Rigidbody.AddForce(Game.Instance.GetRandomVector3(-180, 180) * Game.Instance.GetRandomFloat(0.0003f * Game.Instance.CurrentSpeedMultiplier, 0.0015f * Game.Instance.CurrentSpeedMultiplier), ForceMode.Impulse);
+
+        Rigidbody.drag = Game.Instance.CurrentDrag;
+        Rigidbody.angularDrag = Game.Instance.CurrentDrag;
 
         if (Size < 3)
         {
